@@ -6,8 +6,13 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.toolbox.StringRequest;
 import com.za.finger.ZA_finger;
 import com.za.finger.ZAandroid;
 
@@ -16,6 +21,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -27,8 +33,8 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -72,7 +78,7 @@ public class FingerPrintRegisterActivity extends Activity {
     private final ZAandroid a6 = new ZAandroid();
     private int fpcharbuf = 1;
     private final byte[] pTempletbase = new byte[2304];
-    private int IMG_SIZE = 0;//同参数：（0:256x288 1:256x360）
+    private final int IMG_SIZE = 0;//同参数：（0:256x288 1:256x360）
 
     private final String TAG = "zazdemo";
     private final int DEV_ADDR = 0xffffffff;
@@ -171,26 +177,19 @@ public class FingerPrintRegisterActivity extends Activity {
     private void btnOnClick()
     {
         //打开
-        btnopen.setOnClickListener(new View.OnClickListener() {
-            @SuppressWarnings("unused")
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                byte[] pPassword = new byte[4];
-                skipshow("open");
-                Runnable r = new Runnable() {
-                    public void run() {
-                        isusbfinshed = 3;
-                        ZA_finger fppower = new ZA_finger();
-                        //fppower.finger_power_on();
-                        Sleep(1000);
-                        OpenDev();
-                    }
-                };
-                Thread s = new Thread(r);
-                s.start();
-            }
-
+        btnopen.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            byte[] pPassword = new byte[4];
+            skipshow("open");
+            Runnable r = () -> {
+                isusbfinshed = 3;
+                ZA_finger fppower = new ZA_finger();
+                //fppower.finger_power_on();
+                Sleep(1000);
+                OpenDev();
+            };
+            Thread s = new Thread(r);
+            s.start();
         });
         //关闭
         btnclose.setOnClickListener(new View.OnClickListener() {
@@ -201,60 +200,51 @@ public class FingerPrintRegisterActivity extends Activity {
             }
         });
         //获取图像
-        btngetimg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                setflag(true);
-                fpflag = false;
-                objHandler_fp.removeCallbacks(fpcharTasks);
-                objHandler_fp.removeCallbacks(fperollTasks);
-                objHandler_fp.removeCallbacks(fpsearchTasks);
-                objHandler_fp.removeCallbacks(fpTasks);
-                readsfpimg();
-            }
+        btngetimg.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            setflag(true);
+            fpflag = false;
+            objHandler_fp.removeCallbacks(fpcharTasks);
+            objHandler_fp.removeCallbacks(fperollTasks);
+            objHandler_fp.removeCallbacks(fpsearchTasks);
+            objHandler_fp.removeCallbacks(fpTasks);
+            readsfpimg();
         });
         //获取特征
-        btngetchar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setflag(true);
-                Sleep(500);
-                fpcharflag = false;
-                objHandler_fp.removeCallbacks(fpcharTasks);
-                objHandler_fp.removeCallbacks(fperollTasks);
-                objHandler_fp.removeCallbacks(fpsearchTasks);
-                objHandler_fp.removeCallbacks(fpTasks);
-                readsfpchar();
-            }
+        btngetchar.setOnClickListener(v -> {
+            setflag(true);
+            Sleep(500);
+            fpcharflag = false;
+            objHandler_fp.removeCallbacks(fpcharTasks);
+            objHandler_fp.removeCallbacks(fperollTasks);
+            objHandler_fp.removeCallbacks(fpsearchTasks);
+            objHandler_fp.removeCallbacks(fpTasks);
+            readsfpchar();
         });
         //清空指纹
-        btnequit.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                setflag(true);
-                int Rnet  =  a6.ZAZEmpty(DEV_ADDR);
-                String temp =getResources().getString(R.string.equitsuccess_str)+"\r\n";
-                iPageID = 0;
-                mtvMessage.setText(temp);
-            }
+        btnequit.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            setflag(true);
+            int Rnet  =  a6.ZAZEmpty(DEV_ADDR);
+            String temp =getResources().getString(R.string.equitsuccess_str)+"\r\n";
+            iPageID = 0;
+            mtvMessage.setText(temp);
         });
         //注册指纹
-        btneroll.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                setflag(true);
-                Sleep(500);
-                fperoll = false;
-                objHandler_fp.removeCallbacks(fpcharTasks);
-                objHandler_fp.removeCallbacks(fperollTasks);
-                objHandler_fp.removeCallbacks(fpsearchTasks);
-                objHandler_fp.removeCallbacks(fpTasks);
+        btneroll.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            setflag(true);
+            Sleep(500);
+            fperoll = false;
+            objHandler_fp.removeCallbacks(fpcharTasks);
+            objHandler_fp.removeCallbacks(fperollTasks);
+            objHandler_fp.removeCallbacks(fpsearchTasks);
+            objHandler_fp.removeCallbacks(fpTasks);
 
-                erollfp();
-            }
+            erollfp();
+
+
+
         });
         //搜索指纹
         btnsearch.setOnClickListener(v -> {
@@ -290,76 +280,73 @@ public class FingerPrintRegisterActivity extends Activity {
             }
         });
 
-        btndown.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                byte[] pTemplet = new byte[512];
-                int[] iTempletLength = new int[1];
-                iTempletLength[0] = 512;
-                ssart = System.currentTimeMillis();
+        btndown.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            byte[] pTemplet = new byte[512];
+            int[] iTempletLength = new int[1];
+            iTempletLength[0] = 512;
+            ssart = System.currentTimeMillis();
 
-                File file = new File("/mnt/sdcard/Finger.mb");
-                // 需要读取的文件，参数是文件的路径名加文件名
-                if (file.isFile()) {
-                    // 以字节流方法读取文件
-                    FileInputStream fis = null;
-                    try {
-                        fis = new FileInputStream(file);
-                        // 设置一个，每次 装载信息的容器
-                        byte[] buffer = new byte[1024];
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        // 开始读取数据
-                        int len = 0;// 每次读取到的数据的长度
+            @SuppressLint("SdCardPath") File file = new File("/mnt/sdcard/Finger.mb");
+            // 需要读取的文件，参数是文件的路径名加文件名
+            if (file.isFile()) {
+                // 以字节流方法读取文件
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(file);
+                    // 设置一个，每次 装载信息的容器
+                    byte[] buffer = new byte[1024];
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    // 开始读取数据
+                    int len = 0;// 每次读取到的数据的长度
 
-                        // 已读取的长度
-                        int readAlreadyLength = 0;
-                        int storeid = 0;
-                        while((readAlreadyLength = fis.read(buffer,0,512)) != -1){
+                    // 已读取的长度
+                    int readAlreadyLength = 0;
+                    int storeid = 0;
+                    while((readAlreadyLength = fis.read(buffer,0,512)) != -1){
 
-                            int nRet=a6.ZAZDownChar(DEV_ADDR,a6.CHAR_BUFFER_A, buffer,512);
+                        int nRet=a6.ZAZDownChar(DEV_ADDR,a6.CHAR_BUFFER_A, buffer,512);
+                        if(nRet ==a6.PS_OK)
+                        {
+                            nRet = a6.ZAZStoreChar(DEV_ADDR, a6.CHAR_BUFFER_A, storeid);
                             if(nRet ==a6.PS_OK)
                             {
-                                nRet = a6.ZAZStoreChar(DEV_ADDR, a6.CHAR_BUFFER_A, storeid);
-                                if(nRet ==a6.PS_OK)
-                                {
-                                    String temp=getResources().getString(R.string.erollsuccess_str) +  storeid;
-                                    mtvMessage.setText(temp);
-                                    storeid++;
-                                }
-                                else
-                                {
-                                    String temp=getResources().getString(R.string.erollfail_str) ;
-                                    mtvMessage.setText(temp);
-                                    break;
-                                }
+                                String temp=getResources().getString(R.string.erollsuccess_str) +  storeid;
+                                mtvMessage.setText(temp);
+                                storeid++;
                             }
                             else
                             {
-                                String temp= "下载失败  nRet = " +nRet  ;
-                                // temp +=charToHexString(pTemplet);
+                                String temp=getResources().getString(R.string.erollfail_str) ;
                                 mtvMessage.setText(temp);
                                 break;
-
                             }
                         }
-                        fis.close();
-
-                        if(storeid > 0){
-                            String temp= "下载成功 数量:"+  storeid;
+                        else
+                        {
+                            String temp= "下载失败  nRet = " +nRet  ;
+                            // temp +=charToHexString(pTemplet);
                             mtvMessage.setText(temp);
+                            break;
 
                         }
-
-                    } catch (IOException e) {
-                        String temp= "下载异常中断";
-                        // temp +=charToHexString(pTemplet);
-                        mtvMessage.setText(temp);
                     }
-                } else {
-                    String temp=("/mnt/sdcard/Finger.mb 文件不存在！ pc软件\"上传指纹库\"");
+                    fis.close();
+
+                    if(storeid > 0){
+                        String temp= "下载成功 数量:"+  storeid;
+                        mtvMessage.setText(temp);
+
+                    }
+
+                } catch (IOException e) {
+                    String temp= "下载异常中断";
+                    // temp +=charToHexString(pTemplet);
                     mtvMessage.setText(temp);
                 }
+            } else {
+                @SuppressLint("SdCardPath") String temp=("/mnt/sdcard/Finger.mb 文件不存在！ pc软件\"上传指纹库\"");
+                mtvMessage.setText(temp);
             }
         });
 
@@ -399,7 +386,7 @@ public class FingerPrintRegisterActivity extends Activity {
             isusbfinshed = getrwusbdevices();
             //skipshow("watting a time");
             Log.i(TAG,"waiting user put root ");
-            if(WaitForInterfaces() == false)  {
+            if(!WaitForInterfaces())  {
                 m_fEvent.sendMessage(m_fEvent.obtainMessage(usbfail, R.id.btnopen, 0));
                 return;
             }
@@ -457,7 +444,7 @@ public class FingerPrintRegisterActivity extends Activity {
         testcount = 0;
         objHandler_fp.postDelayed(fpTasks, 0);
     }
-    private Runnable fpTasks = new Runnable() {
+    private final Runnable fpTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -495,7 +482,7 @@ public class FingerPrintRegisterActivity extends Activity {
                 temp += getResources().getString(R.string.upimagesuccess_str) + "耗时:"+timecount+"ms\r\n";
                 mtvMessage.setText(temp);
 
-                String str = "/mnt/sdcard/test.bmp";
+                @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                 a6.ZAZImgData2BMP(Image, str);
                 bmpDefaultPic = BitmapFactory.decodeFile(str,null);
                 mFingerprintIv.setImageBitmap(bmpDefaultPic);
@@ -510,7 +497,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 Log.d(TAG, temp+"2: "+nRet);
                 objHandler_fp.postDelayed(fpTasks, 100);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -524,7 +510,6 @@ public class FingerPrintRegisterActivity extends Activity {
                     temp =getResources().getString(R.string.Communicationerr_str);
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
-                    return;
                 }
             }
             else
@@ -532,7 +517,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 temp =getResources().getString(R.string.Communicationerr_str);
                 Log.d(TAG, temp+"2: "+nRet);
                 mtvMessage.setText(temp);
-                return;
             }
 
         }
@@ -547,7 +531,7 @@ public class FingerPrintRegisterActivity extends Activity {
         testcount = 0;
         objHandler_fp.postDelayed(fpcharTasks, 0);
     }
-    private Runnable fpcharTasks = new Runnable() {
+    private final Runnable fpcharTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -588,7 +572,7 @@ public class FingerPrintRegisterActivity extends Activity {
                     st = System.currentTimeMillis();
                     mtvMessage.setText(temp);
 
-                    String str = "/mnt/sdcard/test.bmp";
+                    @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                     a6.ZAZImgData2BMP(Image, str);
                     bmpDefaultPic = BitmapFactory.decodeFile(str,null);
                     mFingerprintIv.setImageBitmap(bmpDefaultPic);
@@ -643,7 +627,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 Log.d(TAG, temp+"1: "+nRet);
                 objHandler_fp.postDelayed(fpcharTasks, 10);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -657,7 +640,6 @@ public class FingerPrintRegisterActivity extends Activity {
                     temp =getResources().getString(R.string.Communicationerr_str);
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
-                    return;
                 }
             }
             else
@@ -665,7 +647,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 temp =getResources().getString(R.string.Communicationerr_str);
                 Log.d(TAG, temp+"1: "+nRet);
                 mtvMessage.setText(temp);
-                return;
             }
 
         }
@@ -680,9 +661,10 @@ public class FingerPrintRegisterActivity extends Activity {
         isfpon = false;
         testcount = 0;
         objHandler_fp.postDelayed(fperollTasks, 0);
+
     }
 
-    private Runnable fperollTasks = new Runnable() {
+    private final Runnable fperollTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -716,7 +698,7 @@ public class FingerPrintRegisterActivity extends Activity {
                     int[] len = { 0, 0 };
                     byte[] Image = new byte[256 * 360];
                     a6.ZAZUpImage(DEV_ADDR, Image, len);
-                    String str = "/mnt/sdcard/test.bmp";
+                    @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                     a6.ZAZImgData2BMP(Image, str);
                     temp ="获取图像成功";
                     mtvMessage.setText(temp);
@@ -739,12 +721,20 @@ public class FingerPrintRegisterActivity extends Activity {
                         else{
                             nRet = a6.ZAZStoreChar(DEV_ADDR, 1, iPageID);
                             if(nRet == a6.PS_OK){
-                                temp =getResources().getString(R.string.erollsuccess_str)+iPageID;
+                                temp =getResources().getString(R.string.erollsuccess_str);
                                 int[] iTempletLength = new int[1];
                                 nRet=a6.ZAZUpChar(DEV_ADDR,1, pTempletbase, iTempletLength);
                                 //System.arraycopy(pTemplet, 0, pTempletbase, 0, 2304);
                                 mtvMessage.setText(temp);
                                 iPageID++;
+                                String finger_print = String.valueOf(nRet);
+                                byte[] data = finger_print.getBytes(StandardCharsets.UTF_8);
+                                String fPrint = Base64.encodeToString(data, Base64.DEFAULT);
+                                String url = "https://solfixafrica.com/psmart/fingerPrintApi.php?apicall=";
+//                                StringRequest stringRequest = new StringRequest(Request.Method.POST, url);
+
+                                        Intent i = new Intent(FingerPrintRegisterActivity.this, splash_screen.class);
+                                startActivity(i);
                             }
                             else
                             {
@@ -778,7 +768,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 objHandler_fp.postDelayed(fperollTasks, 10);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -793,7 +782,6 @@ public class FingerPrintRegisterActivity extends Activity {
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
 
-                    return;
                 }
             }
             else
@@ -802,7 +790,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 mtvMessage.setText(temp);
 
-                return;
             }
 
         }
@@ -820,7 +807,7 @@ public class FingerPrintRegisterActivity extends Activity {
         objHandler_fp.postDelayed(fpsearchTasks, 0);
     }
 
-    private Runnable fpsearchTasks = new Runnable() {
+    private final Runnable fpsearchTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -846,7 +833,7 @@ public class FingerPrintRegisterActivity extends Activity {
             nRet = a6.ZAZGetImage(DEV_ADDR);
             sd = System.currentTimeMillis();
             timecount = (sd - st);
-            temp += getResources().getString(R.string.getimagesuccess_str) + "耗时:"+timecount+"ms\r\n";
+            temp += getResources().getString(R.string.getimagesuccess_str);
             st = System.currentTimeMillis();
             if(nRet  == 0)
             {
@@ -857,7 +844,7 @@ public class FingerPrintRegisterActivity extends Activity {
                     a6.ZAZUpImage(DEV_ADDR, Image, len);
                     sd = System.currentTimeMillis();
                     timecount = (sd - st);
-                    temp += getResources().getString(R.string.upimagesuccess_str) + "耗时:"+timecount+"ms\r\n";
+                    temp += getResources().getString(R.string.upimagesuccess_str) +timecount+"ms\r\n";
                     st = System.currentTimeMillis();
                     @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                     a6.ZAZImgData2BMP(Image, str);
@@ -871,21 +858,21 @@ public class FingerPrintRegisterActivity extends Activity {
                 {
                     sd = System.currentTimeMillis();
                     timecount = (sd - st);
-                    temp += getResources().getString(R.string.getcharsuccess_str) + "耗时:"+timecount+"ms\r\n";
+//                    temp += getResources().getString(R.string.getcharsuccess_str) + timecount+"ms\r\n";
                     st = System.currentTimeMillis();
                     st = System.currentTimeMillis();
                     nRet = a6.ZAZHighSpeedSearch(DEV_ADDR, 1, 0, 1000, id_iscore);
                     if(nRet == a6.PS_OK){
                         sd = System.currentTimeMillis();
                         timecount = (sd - st);
-                        temp += getResources().getString(R.string.searchsuccess_str) + "耗时:"+timecount+"ms  ID ="+id_iscore[0]+"\r\n";
+//                        temp += getResources().getString(R.string.searchsuccess_str) +timecount+"ms  ID ="+id_iscore[0]+"\r\n";
                         st = System.currentTimeMillis();
                         mtvMessage.setText(temp);
                     }
                     else
                     {
                         temp =getResources().getString(R.string.searchfail_str);
-                        mtvMessage.setText(temp);
+                        mtvMessage.setText(temp);  temp += getResources().getString(R.string.searchsuccess_str) +timecount+"ms  ID ="+id_iscore[0]+"\r\n";
                     }
 
                 }
@@ -907,7 +894,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 objHandler_fp.postDelayed(fpsearchTasks, 10);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -922,7 +908,6 @@ public class FingerPrintRegisterActivity extends Activity {
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
 
-                    return;
                 }
             }
             else
@@ -931,7 +916,6 @@ public class FingerPrintRegisterActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 mtvMessage.setText(temp);
 
-                return;
             }
 
         }
@@ -953,32 +937,22 @@ public class FingerPrintRegisterActivity extends Activity {
 
 
 
-
-
-
-
-
-
-
-
-
-
     /*****************************************
      * 线程   end
      * ***************************************/
 
 
     private static String charToHexString(byte[] val,int len) {
-        String temp="";
+        StringBuilder temp= new StringBuilder();
         for(int i=0;i<len;i++)
         {
             String hex = Integer.toHexString(0xff & val[i]);
             if (hex.length() == 1) {
                 hex = '0' + hex;
             }
-            temp += hex.toUpperCase();
+            temp.append(hex.toUpperCase());
         }
-        return temp;
+        return temp.toString();
     }
 
 //    @Override
@@ -997,7 +971,7 @@ public class FingerPrintRegisterActivity extends Activity {
 
 
 
-    public int LongDunD8800_CheckEuq()
+    public void LongDunD8800_CheckEuq()
     {
         Process process = null;
         DataOutputStream os = null;
@@ -1021,7 +995,6 @@ public class FingerPrintRegisterActivity extends Activity {
             os.writeBytes("exit\n");
             os.flush();
             process.waitFor();
-            return 1;
         }
         catch (Exception e)
         {
@@ -1029,7 +1002,6 @@ public class FingerPrintRegisterActivity extends Activity {
         }
         //  }
         //  }
-        return 0;
     }
 
 
@@ -1049,7 +1021,7 @@ public class FingerPrintRegisterActivity extends Activity {
         this.registerReceiver(mUsbReceiver, filter);
         //this.registerReceiver(mUsbReceiver, new IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED));
         HashMap<String, UsbDevice> deviceList = mDevManager.getDeviceList();
-        if (true) Log.e(TAG, "news:" + "mDevManager");
+        Log.e(TAG, "news:" + "mDevManager");
 
 
         for (UsbDevice tdevice : deviceList.values()) {
@@ -1077,12 +1049,12 @@ public class FingerPrintRegisterActivity extends Activity {
                     Log.e("BroadcastReceiver","3333");
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            if (true) Log.e(TAG, "Authorize permission " + device);
+                            Log.e(TAG, "Authorize permission " + device);
                             isusbfinshed = 1;
                         }
                     }
                     else {
-                        if (true) Log.e(TAG, "permission denied for device " + device);
+                        Log.e(TAG, "permission denied for device " + device);
                         device=null;
                         isusbfinshed = 2;
 
@@ -1098,7 +1070,7 @@ public class FingerPrintRegisterActivity extends Activity {
             i++;
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException e){
+            } catch (InterruptedException ignored){
 
             }
             if(i>2000){
@@ -1109,9 +1081,7 @@ public class FingerPrintRegisterActivity extends Activity {
         }
         if(isusbfinshed == 2)
             return false;
-        if(isusbfinshed == 3)
-            return false;
-        return true;
+        return isusbfinshed != 3;
     }
 
     public int OpenDeviceInterfaces() {
@@ -1128,12 +1098,12 @@ public class FingerPrintRegisterActivity extends Activity {
         if (intf.getEndpointCount() == 0) 	return -1;
 
         if ((connection != null)) {
-            if (true) Log.e(TAG, "open connection success!");
+            Log.e(TAG, "open connection success!");
             fd = connection.getFileDescriptor();
             return fd;
         }
         else {
-            if (true) Log.e(TAG, "finger device open connection FAIL");
+            Log.e(TAG, "finger device open connection FAIL");
             return -1;
         }
     }

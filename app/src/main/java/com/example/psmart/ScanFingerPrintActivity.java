@@ -501,7 +501,7 @@ public class ScanFingerPrintActivity extends Activity {
                 temp += getResources().getString(R.string.upimagesuccess_str) + "耗时:"+timecount+"ms\r\n";
                 mtvMessage.setText(temp);
 
-                String str = "/mnt/sdcard/test.bmp";
+                @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                 a6.ZAZImgData2BMP(Image, str);
                 bmpDefaultPic = BitmapFactory.decodeFile(str,null);
                 mFingerprintIv.setImageBitmap(bmpDefaultPic);
@@ -516,7 +516,6 @@ public class ScanFingerPrintActivity extends Activity {
                 Log.d(TAG, temp+"2: "+nRet);
                 objHandler_fp.postDelayed(fpTasks, 100);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -530,7 +529,6 @@ public class ScanFingerPrintActivity extends Activity {
                     temp =getResources().getString(R.string.Communicationerr_str);
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
-                    return;
                 }
             }
             else
@@ -538,7 +536,6 @@ public class ScanFingerPrintActivity extends Activity {
                 temp =getResources().getString(R.string.Communicationerr_str);
                 Log.d(TAG, temp+"2: "+nRet);
                 mtvMessage.setText(temp);
-                return;
             }
 
         }
@@ -553,7 +550,7 @@ public class ScanFingerPrintActivity extends Activity {
         testcount = 0;
         objHandler_fp.postDelayed(fpcharTasks, 0);
     }
-    private Runnable fpcharTasks = new Runnable() {
+    private final Runnable fpcharTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -594,7 +591,7 @@ public class ScanFingerPrintActivity extends Activity {
                     st = System.currentTimeMillis();
                     mtvMessage.setText(temp);
 
-                    String str = "/mnt/sdcard/test.bmp";
+                    @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                     a6.ZAZImgData2BMP(Image, str);
                     bmpDefaultPic = BitmapFactory.decodeFile(str,null);
                     mFingerprintIv.setImageBitmap(bmpDefaultPic);
@@ -649,7 +646,6 @@ public class ScanFingerPrintActivity extends Activity {
                 Log.d(TAG, temp+"1: "+nRet);
                 objHandler_fp.postDelayed(fpcharTasks, 10);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -663,7 +659,6 @@ public class ScanFingerPrintActivity extends Activity {
                     temp =getResources().getString(R.string.Communicationerr_str);
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
-                    return;
                 }
             }
             else
@@ -671,7 +666,6 @@ public class ScanFingerPrintActivity extends Activity {
                 temp =getResources().getString(R.string.Communicationerr_str);
                 Log.d(TAG, temp+"1: "+nRet);
                 mtvMessage.setText(temp);
-                return;
             }
 
         }
@@ -688,7 +682,7 @@ public class ScanFingerPrintActivity extends Activity {
         objHandler_fp.postDelayed(fperollTasks, 0);
     }
 
-    private Runnable fperollTasks = new Runnable() {
+    private final Runnable fperollTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -722,7 +716,7 @@ public class ScanFingerPrintActivity extends Activity {
                     int[] len = { 0, 0 };
                     byte[] Image = new byte[256 * 360];
                     a6.ZAZUpImage(DEV_ADDR, Image, len);
-                    String str = "/mnt/sdcard/test.bmp";
+                    @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                     a6.ZAZImgData2BMP(Image, str);
                     temp ="获取图像成功";
                     mtvMessage.setText(temp);
@@ -784,7 +778,6 @@ public class ScanFingerPrintActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 objHandler_fp.postDelayed(fperollTasks, 10);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -799,7 +792,6 @@ public class ScanFingerPrintActivity extends Activity {
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
 
-                    return;
                 }
             }
             else
@@ -808,7 +800,6 @@ public class ScanFingerPrintActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 mtvMessage.setText(temp);
 
-                return;
             }
 
         }
@@ -826,7 +817,7 @@ public class ScanFingerPrintActivity extends Activity {
         objHandler_fp.postDelayed(fpsearchTasks, 0);
     }
 
-    private Runnable fpsearchTasks = new Runnable() {
+    private final Runnable fpsearchTasks = new Runnable() {
         public void run()// 运行该服务执行此函数
         {
             String temp="";
@@ -852,8 +843,9 @@ public class ScanFingerPrintActivity extends Activity {
             nRet = a6.ZAZGetImage(DEV_ADDR);
             sd = System.currentTimeMillis();
             timecount = (sd - st);
-            temp += getResources().getString(R.string.getimagesuccess_str) + "耗时:"+timecount+"ms\r\n";
+            temp += getResources().getString(R.string.getimagesuccess_str);
             st = System.currentTimeMillis();
+
             if(nRet  == 0)
             {
                 if(isshowbmp)
@@ -863,9 +855,9 @@ public class ScanFingerPrintActivity extends Activity {
                     a6.ZAZUpImage(DEV_ADDR, Image, len);
                     sd = System.currentTimeMillis();
                     timecount = (sd - st);
-                    temp += getResources().getString(R.string.upimagesuccess_str) + "耗时:"+timecount+"ms\r\n";
+                    temp += getResources().getString(R.string.upimagesuccess_str);
                     st = System.currentTimeMillis();
-                    String str = "/mnt/sdcard/test.bmp";
+                    @SuppressLint("SdCardPath") String str = "/mnt/sdcard/test.bmp";
                     a6.ZAZImgData2BMP(Image, str);
                     mtvMessage.setText(temp);
                     Bitmap bmpDefaultPic;
@@ -877,16 +869,19 @@ public class ScanFingerPrintActivity extends Activity {
                 {
                     sd = System.currentTimeMillis();
                     timecount = (sd - st);
-                    temp += getResources().getString(R.string.getcharsuccess_str) + "耗时:"+timecount+"ms\r\n";
+//                    temp += getResources().getString(R.string.getcharsuccess_str);
                     st = System.currentTimeMillis();
                     st = System.currentTimeMillis();
                     nRet = a6.ZAZHighSpeedSearch(DEV_ADDR, 1, 0, 1000, id_iscore);
                     if(nRet == a6.PS_OK){
                         sd = System.currentTimeMillis();
                         timecount = (sd - st);
-                        temp += getResources().getString(R.string.searchsuccess_str) + "耗时:"+timecount+"ms  ID ="+id_iscore[0]+"\r\n";
+//                        temp += getResources().getString(R.string.searchsuccess_str) + "耗时:"+timecount+"ms  ID ="+id_iscore[0]+"\r\n";
                         st = System.currentTimeMillis();
                         mtvMessage.setText(temp);
+
+                        Intent i = new Intent(ScanFingerPrintActivity.this, splash_screen_scan.class);
+                        startActivity(i);
                     }
                     else
                     {
@@ -913,7 +908,6 @@ public class ScanFingerPrintActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 objHandler_fp.postDelayed(fpsearchTasks, 10);
                 mtvMessage.setText(temp);
-                return;
             }else if(nRet == -2)
             {
                 testcount ++;
@@ -928,7 +922,6 @@ public class ScanFingerPrintActivity extends Activity {
                     Log.d(TAG, temp+": "+nRet);
                     mtvMessage.setText(temp);
 
-                    return;
                 }
             }
             else
@@ -937,7 +930,6 @@ public class ScanFingerPrintActivity extends Activity {
                 Log.d(TAG, temp+": "+nRet);
                 mtvMessage.setText(temp);
 
-                return;
             }
 
         }

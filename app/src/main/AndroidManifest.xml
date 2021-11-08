@@ -22,12 +22,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <activity
-            android:name=".TestFingerPrint"
+            android:name=".splash_screen_scan"
+            android:exported="false" />
+        <activity
+            android:name=".ScanFaceActivity"
             android:exported="false" />
         <activity
             android:name=".DisplayActivity"
             android:exported="true" />
-
         <activity
             android:name=".FingerPrintRegisterActivity"
             android:exported="true" />

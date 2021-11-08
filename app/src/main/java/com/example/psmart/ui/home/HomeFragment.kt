@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ReportFragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.psmart.FingerPrintRegisterActivity
 import com.example.psmart.R
 import com.example.psmart.ScanFingerPrintActivity
 import com.example.psmart.databinding.FragmentHomeBinding
-import com.example.psmart.splash_screen
 
 
 class HomeFragment : Fragment() {
@@ -58,15 +58,15 @@ class HomeFragment : Fragment() {
     //    return root
 
 
-        val view: View = inflater!!.inflate(R.layout.fragment_home, container, false)
-        val register_new = view.findViewById<Button>(R.id.register_new)
-        register_new.setOnClickListener {
-            val intent = Intent(activity, splash_screen::class.java)
+        val view: View = inflater.inflate(R.layout.fragment_home, container, false)
+        val registerNew = view.findViewById<Button>(R.id.register_new)
+        registerNew.setOnClickListener {
+            val intent = Intent(activity, FingerPrintRegisterActivity::class.java)
             startActivity(intent)
         }
         val register = view.findViewById<Button>(R.id.reports)
         register.setOnClickListener {
-            val intent = Intent(activity, FingerPrintRegisterActivity::class.java)
+            val intent = Intent(activity, ReportFragment::class.java)
             startActivity(intent)
         }
 

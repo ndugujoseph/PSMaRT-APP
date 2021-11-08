@@ -11,7 +11,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.psmart.MainActivity
 import com.example.psmart.R
-import com.example.psmart.TestFingerPrint
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
@@ -34,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
 
         //if user presses on forgot password
         findViewById<TextView>(R.id.forgot_password).setOnClickListener {
-            startActivity(Intent(applicationContext,TestFingerPrint::class.java))
+            startActivity(Intent(applicationContext,ForgotPasswordActivity::class.java))
         }
     }
 

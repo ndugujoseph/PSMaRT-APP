@@ -74,7 +74,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class NewFaceActivity extends AppCompatActivity {
+public class ScanFaceActivity extends AppCompatActivity {
 
 
     FaceDetector detector;
@@ -88,7 +88,7 @@ public class NewFaceActivity extends AppCompatActivity {
     ImageButton add_face;
     CameraSelector cameraSelector;
     boolean start=true,flipX=false;
-    Context context=NewFaceActivity.this;
+    Context context=ScanFaceActivity.this;
     int cam_face=CameraSelector.LENS_FACING_BACK; //Default Back Camera
 
     int[] intValues;
@@ -111,7 +111,7 @@ public class NewFaceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         registered=readFromSP(); //Load saved faces from memory when app starts
-        setContentView(R.layout.activity_new_face);
+        setContentView(R.layout.activity_scan_face);
 
 
         face_preview = findViewById(R.id.imageView);
@@ -218,7 +218,7 @@ public class NewFaceActivity extends AppCompatActivity {
 
         //Load model
         try {
-            tfLite=new Interpreter(loadModelFile(NewFaceActivity.this,modelFile));
+            tfLite=new Interpreter(loadModelFile(ScanFaceActivity.this,modelFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
